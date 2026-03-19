@@ -1,0 +1,17 @@
+node_modules
+dist
+.env
+.DS_Store
+*.local
+uploads/*
+!uploads/.gitkeep
+
+# OAuth Tokens & Secrets
+token.json
+client_secret*.json
+
+# Agent metadata
+.agent
+.gemini
+logs
+*.log
