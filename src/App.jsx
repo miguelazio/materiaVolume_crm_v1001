@@ -732,7 +732,8 @@ export default function App() {
 
       </nav>
 
-
+      {/* Sidebar overlay for mobile — click to close */}
+      <div className={`sidebar-overlay${sidebarOpen ? " open" : ""}`} onClick={() => setSidebarOpen(false)} />
 
       {/* MAIN */}
 
