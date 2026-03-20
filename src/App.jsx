@@ -376,6 +376,7 @@ export default function App() {
   const [tab, setTab] = React.useState("pipeline");
   const [viewMode, setViewMode] = React.useState("table");
   const [modal, setModal] = React.useState(null);
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const [swSearch, setSwSearch] = React.useState("");
   const [swFilter, setSwFilter] = React.useState("all");
@@ -677,14 +678,17 @@ export default function App() {
 
       {/* SIDEBAR */}
 
-      <nav className="sidebar">
+      <nav className={`sidebar${sidebarOpen ? " open" : ""}`}>
 
-        <div className="sidebar-logo">MV<span style={{ color: "var(--accent)" }}>.</span></div>
+        <div className="sidebar-logo">
+          MV<span style={{ color: "var(--accent)" }}>.</span>
+          <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)}>×</button>
+        </div>
 
         {TABS.map(([k, icon, label]) => {
           if (k === "users" && session?.user?.email !== 'vfxmiguel@gmail.com') return null;
           return (
-            <div key={k} className={`nav-item${tab === k ? " active" : ""}`} onClick={() => setTab(k)}>
+            <div key={k} className={`nav-item${tab === k ? " active" : ""}`} onClick={() => { setTab(k); setSidebarOpen(false); }}>
               <span className="nav-icon">{icon}</span>{label}
             </div>
           );
@@ -736,7 +740,10 @@ export default function App() {
 
         <div className="topbar">
 
-          <div className="topbar-title">{TITLES[tab]}</div>
+          <div className="topbar-left">
+            <button className="sidebar-toggle" onClick={() => setSidebarOpen(true)}>☰</button>
+            <div className="topbar-title">{TITLES[tab]}</div>
+          </div>
 
           <div className="topbar-actions">
 
@@ -916,7 +923,7 @@ export default function App() {
 
           {tab === "projects" && <>
 
-            <div className="stats-row" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
+            <div className="stats-row stats-grid-3">
 
               <div className="stat-card"><div className="stat-label">{t.active}</div><div className="stat-value">{projects.filter(p => p.phase < 7).length}</div><div className="stat-sub">{t.in_progress}</div></div>
 
@@ -996,7 +1003,7 @@ export default function App() {
 
           {tab === "partners" && <>
 
-            <div className="stats-row" style={{ gridTemplateColumns: "repeat(2,1fr)" }}>
+            <div className="stats-row stats-grid-2">
 
               <div className="stat-card"><div className="stat-label">{t.total_partners}</div><div className="stat-value">{partners.length}</div><div className="stat-sub">{t.active}</div></div>
 
@@ -1064,7 +1071,7 @@ export default function App() {
 
           {tab === "software" && <>
 
-            <div className="stats-row" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
+            <div className="stats-row stats-grid-3">
 
               <div className="stat-card"><div className="stat-label">{t.sw_total}</div><div className="stat-value">{softwareCatalog.length}</div><div className="stat-sub">{t.sw_in_catalog}</div></div>
 
@@ -1236,7 +1243,7 @@ export default function App() {
               </div>
 
               {/* Two action areas side by side */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="vault-actions">
 
                 {/* File Upload */}
                 <div style={{ background: "var(--bg)", border: "1px dashed var(--border)", borderRadius: "var(--radius)", padding: 16, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, minHeight: 100 }}>
@@ -1348,7 +1355,7 @@ export default function App() {
 
           {/* PARTNERS */}
           {tab === "partners" && <>
-            <div className="stats-row" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+            <div className="stats-row stats-grid-2">
               <div className="stat-card"><div className="stat-label">{t.total_partners}</div><div className="stat-value">{partners.length}</div></div>
               <div className="stat-card"><div className="stat-label">{t.onboarded_partners}</div><div className="stat-value" style={{ color: "var(--won)" }}>{partners.filter(p => p.status_key === 3).length}</div></div>
             </div>
