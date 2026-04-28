@@ -598,19 +598,24 @@ export default function App() {
   };
 
   const saveLead = async (d) => {
-    if (d.id) {
-      const { data, error } = await supabase.from('leads').update(d).eq('id', d.id).select().single();
+    // Sanitize dates: convert empty strings to null
+    const payload = { ...d };
+    if (payload.followUp === "") payload.followUp = null;
+    if (payload.createdAt === "") payload.createdAt = null;
+
+    if (payload.id) {
+      const { data, error } = await supabase.from('leads').update(payload).eq('id', payload.id).select().single();
       if (error) {
         console.error('saveLead update error:', error);
-        alert(`Supabase Error: ${error.message}\n\nPlease ensure you have added a "custom_type" text column in your 'leads' table!`);
+        alert(`Supabase Error: ${error.message}`);
         return;
       }
-      if (data) setLeads(p => p.map(l => l.id === d.id ? data : l));
+      if (data) setLeads(p => p.map(l => l.id === payload.id ? data : l));
     } else {
-      const { data, error } = await supabase.from('leads').insert([d]).select().single();
+      const { data, error } = await supabase.from('leads').insert([payload]).select().single();
       if (error) {
         console.error('saveLead insert error:', error);
-        alert(`Supabase Error: ${error.message}\n\nPlease ensure you have added a "custom_type" text column in your 'leads' table!`);
+        alert(`Supabase Error: ${error.message}`);
         return;
       }
       if (data) setLeads(p => [...p, data]);
@@ -661,10 +666,48 @@ export default function App() {
     setModal(null);
   };
   const togglePaid = async (id, idx) => { const proj = projects.find(p => p.id === id); if (!proj) return; const paid = [...proj.paid]; paid[idx] = !paid[idx]; const { data } = await supabase.from('projects').update({ paid }).eq('id', id).select().single(); if (data) setProjects(p => p.map(x => x.id === id ? data : x)); };
-  const savePartner = async (d) => { if (d.id) { const { data } = await supabase.from('partners').update(d).eq('id', d.id).select().single(); if (data) setPartners(p => p.map(x => x.id === d.id ? data : x)); } else { const { data } = await supabase.from('partners').insert([d]).select().single(); if (data) setPartners(p => [...p, data]); } setModal(null); };
+  const savePartner = async (d) => {
+    const payload = { ...d };
+    if (d.id) {
+      const { data, error } = await supabase.from('partners').update(payload).eq('id', d.id).select().single();
+      if (error) { console.error('savePartner error:', error); alert(`Error: ${error.message}`); return; }
+      if (data) setPartners(p => p.map(x => x.id === d.id ? data : x));
+    } else {
+      const { data, error } = await supabase.from('partners').insert([payload]).select().single();
+      if (error) { console.error('savePartner error:', error); alert(`Error: ${error.message}`); return; }
+      if (data) setPartners(p => [...p, data]);
+    }
+    setModal(null);
+  };
   const deletePartner = async (id) => { await supabase.from('partners').delete().eq('id', id); setPartners(p => p.filter(x => x.id !== id)); setModal(null); };
-  const saveContent = async (d) => { if (d.id) { const { data } = await supabase.from('content_calendar').update(d).eq('id', d.id).select().single(); if (data) setContent(p => p.map(x => x.id === d.id ? data : x)); } else { const { data } = await supabase.from('content_calendar').insert([d]).select().single(); if (data) setContent(p => [...p, data]); } setModal(null); };
-  const saveJob = async (d) => { if (d.id) { const { data } = await supabase.from('jobs').update(d).eq('id', d.id).select().single(); if (data) setJobs(p => p.map(x => x.id === d.id ? data : x)); } else { const { data } = await supabase.from('jobs').insert([d]).select().single(); if (data) setJobs(p => [...p, data]); } setModal(null); };
+  const saveContent = async (d) => {
+    const payload = { ...d };
+    if (payload.publish_date === "") payload.publish_date = null;
+    if (d.id) {
+      const { data, error } = await supabase.from('content_calendar').update(payload).eq('id', d.id).select().single();
+      if (error) { console.error('saveContent error:', error); alert(`Error: ${error.message}`); return; }
+      if (data) setContent(p => p.map(x => x.id === d.id ? data : x));
+    } else {
+      const { data, error } = await supabase.from('content_calendar').insert([payload]).select().single();
+      if (error) { console.error('saveContent error:', error); alert(`Error: ${error.message}`); return; }
+      if (data) setContent(p => [...p, data]);
+    }
+    setModal(null);
+  };
+  const saveJob = async (d) => {
+    const payload = { ...d };
+    if (payload.date === "") payload.date = null;
+    if (d.id) {
+      const { data, error } = await supabase.from('jobs').update(payload).eq('id', d.id).select().single();
+      if (error) { console.error('saveJob error:', error); alert(`Error: ${error.message}`); return; }
+      if (data) setJobs(p => p.map(x => x.id === d.id ? data : x));
+    } else {
+      const { data, error } = await supabase.from('jobs').insert([payload]).select().single();
+      if (error) { console.error('saveJob error:', error); alert(`Error: ${error.message}`); return; }
+      if (data) setJobs(p => [...p, data]);
+    }
+    setModal(null);
+  };
 
   React.useEffect(() => { document.documentElement.setAttribute("data-theme", theme); }, [theme]);
 
