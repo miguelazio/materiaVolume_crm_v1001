@@ -563,7 +563,12 @@ export default function App() {
   React.useEffect(() => {
     if (!session) return;
     async function loadData() {
-      supabase.from('leads').select('*').then(({ data }) => data && setLeads(data));
+      console.log('Loading data for session:', session.user.email);
+      supabase.from('leads').select('*').then(({ data, error }) => {
+        if (error) console.error('Fetch leads error:', error);
+        console.log('Fetched leads:', data?.length || 0, data);
+        if (data) setLeads(data);
+      });
       supabase.from('projects').select('*').then(({ data }) => data && setProjects(data));
       supabase.from('partners').select('*').then(({ data }) => data && setPartners(data));
       supabase.from('software_catalog').select('*').then(({ data }) => data && setSoftwareCatalog(data));
@@ -751,6 +756,7 @@ export default function App() {
   const overdue = leads.filter(l => l.followUp && l.followUp < todayStr && l.status < 5);
 
   const filteredLeads = leads.filter(l => {
+    if (!l.company) return false; // Hide leads without a company name to prevent crashes
     if (search && !l.company.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterStatus !== "all" && String(l.status) !== filterStatus) return false;
     if (filterType !== "all") {
@@ -763,8 +769,10 @@ export default function App() {
     }
     return true;
   }).sort((a, b) => {
-    if (sortOrder === "desc") return (b.createdAt || "").localeCompare(a.createdAt || "");
-    return (a.createdAt || "").localeCompare(b.createdAt || "");
+    const valA = a.createdAt || "";
+    const valB = b.createdAt || "";
+    if (sortOrder === "desc") return valB.localeCompare(valA);
+    return valA.localeCompare(valB);
   });
 
   if (!session) {
